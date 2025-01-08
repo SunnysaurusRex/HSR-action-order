@@ -2,15 +2,54 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
+
+#pandas read xcel file
+c1 = pd.read_excel('HSR_speed1.xlsx',
+					   sheet_name = 0,
+					   index_col = None
+					   )
+sheet2 = pd.read_excel('HSR_speed1.xlsx',
+					   sheet_name = 1,
+					   index_col = None
+					   )
+sheet3 = pd.read_excel('HSR_speed1.xlsx',
+					   sheet_name = 2,
+					   index_col = None
+					   )
+sheet4 = pd.read_excel('HSR_speed1.xlsx',
+					   sheet_name = 3,
+					   index_col = None
+					   )
+print(sheet2.index) #column names
+test_name = sheet2['extra_spd']
+print('x',test_name)
+test_array = sheet3['extra_spd']
+print(c1['name'][0])
+
+N = 7
+#reformat dataframe columns into arrays size N
+def reform(array, n):
+	array = array.to_numpy()
+	array[np.isnan(array)] = 0 #isnan is useful for finding bad data in arrays / if isnan True: change nan to 0
+	array = np.concatenate([array, np.zeros(n - array.size)])
+	return array
+
+print(reform(test_array, N))
+
+
+
 class character:
 	def __init__(self, name, base_speed, extra_speed, N, percent_speed, flat_speed, action_forward):
 		self.name = name
 		self.b_spd = base_speed 
 		self.e_spd = extra_speed
 		self.n = N
-		self.p_spd = np.array(percent_speed, dtype=object)
-		self.f_spd = np.array(flat_speed, dtype=object)
-		self.af = np.array(action_forward, dtype=object)
+		self.p_spd = percent_speed
+		self.f_spd = flat_speed
+		self.af = action_forward
+		#self.p_spd = np.array(percent_speed, dtype=object)
+		#self.f_spd = np.array(flat_speed, dtype=object)
+		#self.af = np.array(action_forward, dtype=object)
 		self.AV = np.empty(self.n)
 		self.AV[0] = (10000/((self.b_spd*(1+(self.p_spd[0]/100)))+(self.e_spd+self.f_spd[0])))*((100-self.af[0])/100)
 		for i in range(1, self.n):
@@ -47,12 +86,19 @@ class character:
 		return AV_df
 
 
-Jade_percent_speed= np.concatenate( ([10]*2, np.zeros(5)) )
-Jade_flat_speed = np.zeros(7)
-Jade_action_forward = [50, 0, 0, 0, 0, 0, 0]
-Jade = character('Jade', 103, 4, 7, Jade_percent_speed, Jade_flat_speed, Jade_action_forward)
-
-
+#Jade_percent_speed= np.concatenate( ([10]*2, np.zeros(5)) )
+#Jade_flat_speed = np.zeros(7)
+#Jade_action_forward = [50, 0, 0, 0, 0, 0, 0]
+#Jade = character('Jade', 103, 4, 7, Jade_percent_speed, Jade_flat_speed, Jade_action_forward)
+print('b', c1['base_spd'][0])
+Jade = character(c1['name'][0],
+				 c1['base_spd'][0],
+				 c1['extra_spd'][0], 7,
+				 reform(c1['percent_spd'], N),
+				 reform(c1['flat_spd'], N),
+				 reform(c1['action_forward'], N)
+				 
+				 )
 
 Jade.print_AV()
 #print('Jade AV:', Jade.AV())
@@ -72,7 +118,6 @@ Gallagher_percent_speed = np.concatenate( ([10]*2, np.zeros(5)) )
 Gallagher_flat_speed = np.zeros(7)
 Gallagher_action_forward = np.zeros(7)
 Gallagher = character('Gallagher', 98, 42, 7, Gallagher_percent_speed, Gallagher_flat_speed, Gallagher_action_forward)
-
 
 print('xd')
 
@@ -101,6 +146,7 @@ row_count = y.shape[0]
 print('a',y.index)
 print('\n first action\n', y)
 
+"""
 while True:
 	if y.empty: 
 		print('\nlast action')
@@ -118,6 +164,6 @@ while True:
 		y = y.drop(0)
 		y = y.reset_index(drop=True)
 
-
+"""
 
 
