@@ -3,27 +3,18 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 
-#pandas read xcel file
-c1 = pd.read_excel('HSR_speed1.xlsx',
-					   sheet_name = 0,
-					   index_col = None
-					   )
-sheet2 = pd.read_excel('HSR_speed1.xlsx',
-					   sheet_name = 1,
-					   index_col = None
-					   )
-sheet3 = pd.read_excel('HSR_speed1.xlsx',
-					   sheet_name = 2,
-					   index_col = None
-					   )
-sheet4 = pd.read_excel('HSR_speed1.xlsx',
-					   sheet_name = 3,
-					   index_col = None
-					   )
-print(sheet2.index) #column names
-test_name = sheet2['extra_spd']
+#pandas read xcel file -- returns a dict of dataframes for multiple sheets:
+sheets= pd.read_excel('HSR_speed1.xlsx', sheet_name=None, index_col=None)
+keys = list(sheets.keys()) #['c1', 'c2', 'c3', 'c4'] sheet names from xcel
+c1 = sheets[keys[0]] #grab sheet index as if it were a df column name
+c2 = sheets[keys[1]]
+c3 = sheets[keys[2]]
+c4 = sheets[keys[3]]
+
+print(c3.index) #column names
+test_name = c3['extra_spd']
 print('x',test_name)
-test_array = sheet3['extra_spd']
+test_array = c3['extra_spd']
 print(c1['name'][0])
 
 N = 7
@@ -58,7 +49,7 @@ class character:
 	
 
 	def print(self):
-		print(f'{self.name} {self.b_spd} {self.f_spd} {self.p_spd}\n {self.AV}kekw')
+		print(f'{self.name} {self.b_spd} {self.f_spd} {self.p_spd}\n {self.AV}kw')
 
 	def print_AV(self): print(f'{self.AV}')
 
@@ -91,18 +82,40 @@ class character:
 #Jade_action_forward = [50, 0, 0, 0, 0, 0, 0]
 #Jade = character('Jade', 103, 4, 7, Jade_percent_speed, Jade_flat_speed, Jade_action_forward)
 print('b', c1['base_spd'][0])
+'''
 Jade = character(c1['name'][0],
 				 c1['base_spd'][0],
 				 c1['extra_spd'][0], 7,
 				 reform(c1['percent_spd'], N),
 				 reform(c1['flat_spd'], N),
-				 reform(c1['action_forward'], N)
-				 
+				 reform(c1['action_forward'], N) 
 				 )
+'''
+#create function to make 'character' objects
+def create_characters_from_df(df, N):
+	unit = character(
+		df['name'][0],
+		df['base_spd'][0],
+		df['extra_spd'][0], N,
+		reform(df['percent_spd'], N),
+		reform(df['flat_spd'], N),
+		reform(df['action_forward'], N) 
+	)
+	return unit
+
+team = {} # create empty dict to hold team member names
+for i, keys in enumerate(keys): # create iterable list from dict
+	df = sheets[keys] #grab each individual df from each sheet
+	team[f'c{i+1}'] = create_characters_from_df(df, N)
+
+Jade = team['c1']
+Yukong = team['c2']
+Serval = team['c3']
+Gallagher = team['c4']
 
 Jade.print_AV()
 #print('Jade AV:', Jade.AV())
-
+'''
 Yukong_percent_speed = np.concatenate( ([10]*2, np.zeros(7)) )
 Yukong_flat_speed = np.zeros(9)
 Yukong_action_forward = np.zeros(9)
@@ -118,7 +131,7 @@ Gallagher_percent_speed = np.concatenate( ([10]*2, np.zeros(5)) )
 Gallagher_flat_speed = np.zeros(7)
 Gallagher_action_forward = np.zeros(7)
 Gallagher = character('Gallagher', 98, 42, 7, Gallagher_percent_speed, Gallagher_flat_speed, Gallagher_action_forward)
-
+'''
 print('xd')
 
 x = pd.concat([Jade.AVsort(), Yukong.AVsort(), Serval.AVsort(), Gallagher.AVsort()])
